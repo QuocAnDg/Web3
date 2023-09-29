@@ -1,31 +1,24 @@
+/* eslint-disable react/prop-types */
 import { useState } from 'react'
 const Display = ({ counter }) => <div>{counter}</div>
-const Button = ({ handleClick, text }) => <button onClick={handleClick}>{text}</button>
+const Button = ({ changeCount , delta, text}) => <button onClick={changeCount} data-delta={delta}>{text}</button>
 const App = () => {
   const [counter, setCounter] = useState(0)
-  console.log('rendering with counter value', counter)
-
-  const increaseByOne = () => {
-    console.log('increasing, value before', counter)
-    setCounter(counter + 1)
+  const changeCount = (delta) => {
+      setCounter(counter + delta)
   }
-
-  const decreaseByOne = () => { 
-    console.log('decreasing, value before', counter)
-    setCounter(counter - 1)
+  const handleClick = (e) => {
+    const delta = parseInt(e.target.dataset.delta, 10)
+    changeCount(delta)
   }
-
-  const setToZero = () => {
-    console.log('resetting to zero, value before', counter)
-    setCounter(0)
-  }
-
   return (
     <div>
       <Display counter={counter} />
-      <Button handleClick={increaseByOne} text="plus" />
-      <Button handleClick={setToZero} text="zero" />
-      <Button handleClick={decreaseByOne} text="minus" />
+      <Button changeCount={handleClick} text="plus" delta ="1"/>
+
+      <Button changeCount={handleClick} text="minus" delta ="-1"/>
+      <Button changeCount={handleClick} text="zero" delta ={-counter}/>
+
     </div>
   )
 } 
