@@ -1,0 +1,18 @@
+@hostname = localhost
+@port = 3001
+@host = http://{{hostname}}:{{port}}
+
+###
+
+POST {{host}}/api/scores/ HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{
+  "username": "aaaaazzadzadzadazadaa",
+  "date": "2024-01-31",
+  "score": 2,
+  "joke": "6599512e05a2ef676cc43c6f"
+}
+
+
