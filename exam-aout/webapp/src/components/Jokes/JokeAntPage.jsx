@@ -2,19 +2,14 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { JokeContext } from '../../contexts/JokesContext';
 import scoreService from "../../services/scoreApi"
-
+import { Button, Checkbox, Form, Input } from 'antd';
 const JokePage = () => {
   const { id } = useParams(); // joke id
   const { getJokeWithScores } = useContext(JokeContext);
   const navigate = useNavigate();
-  const [newScore, setNewScore] = useState(
-    {
-        username: "",
-        date: "",
-        score: 0,
-        joke:"",
-    }
-  );
+  const [form] = Form.useForm();
+
+
   const [jokeWithScores, setJokeWithScores] = useState(null);
   useEffect(() => {
     const fetchData =  () => {
@@ -31,15 +26,7 @@ const JokePage = () => {
   
     fetchData();
   }, [id, getJokeWithScores]);
-  const handleOnChange = (e) => {
-    const { name, value } = e.target;
-    setNewScore((prevNewScore) => {
-      return {
-        ...prevNewScore,
-        [name]: value,
-      };
-    });
-  };
+
 
   const addScore = async (score) => {
     try {
@@ -52,19 +39,16 @@ const JokePage = () => {
       throw error;
     }
   };
-  const handleAddScore = (e) => {
-    e.preventDefault();
+  const handleAddScore = (values) => {
+
     try {
       // Validate inputs
-      if (!newScore.username || isNaN(newScore.score) || newScore.score < 0 || newScore.score > 10) {
-        alert('Please enter a valid username and score (between 0 and 10).');
-        return;
-      }
-  
+
       // Add date and joke ID to the new score
       const currentDate = new Date().toISOString();
       const scoreToAdd = {
-        ...newScore,
+        username: values.username,
+        score: values.score,
         date: currentDate,
         joke: id,
       };
@@ -82,16 +66,8 @@ const JokePage = () => {
           scores: [...prevJokeWithScores.scores, scoreToAdd],
         };
       }); 
-
-        //reset form
-        e.target.reset();
-        setNewScore({
-          username: "",
-          date: "",
-          score: 0,
-          joke: "",
-        });
-      // navigate("/jokes")
+    // Reset form fields
+    form.resetFields();
     } catch (error) {
       console.error('Error adding score:', error.message);
     }
@@ -115,11 +91,38 @@ const JokePage = () => {
             ))}
           </ul>
           <div>
-          <form onSubmit={handleAddScore}>
-            <input name='username' type="text" placeholder="Username" value={newScore.username} onChange={handleOnChange}/>
-            <input name="score" placeholder="Score" value={newScore.score} onChange={handleOnChange} />
-            <input type="submit" value = "add score"/>
-          </form>
+          <Form form ={form} onFinish={handleAddScore}>  
+          <Form.Item
+          label="Username"
+          name="username"
+          rules={[
+            {
+              required: true,
+              message: 'Please input an author',
+            },
+          ]}
+            >
+          <Input/>
+          </Form.Item>
+          <Form.Item
+          label="Score"
+          name="score"
+          rules={[
+            {
+              required: true,
+              message: 'Please input an author',
+            },
+          ]}
+            >
+          <Input/>
+          </Form.Item>
+          <Form.Item> 
+      <Button type="primary" htmlType="submit">
+            Create
+          </Button>
+        </Form.Item>
+          </Form>
+        
           </div>
         </>
       ): (
