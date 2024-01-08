@@ -1,11 +1,12 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { JokeContext } from '../../contexts/JokesContext';
 import scoreService from "../../services/scoreApi"
 
 const JokePage = () => {
   const { id } = useParams(); // joke id
   const { getJokeWithScores } = useContext(JokeContext);
+  const navigate = useNavigate();
   const [newScore, setNewScore] = useState(
     {
         username: "",
@@ -15,7 +16,21 @@ const JokePage = () => {
     }
   );
   const [jokeWithScores, setJokeWithScores] = useState(null);
-
+  useEffect(() => {
+    const fetchData =  () => {
+      try {
+        // Check if id is available before fetching the joke data
+  
+        const jokeData =  getJokeWithScores(id);
+        setJokeWithScores(jokeData);
+      
+      } catch (error) {
+        console.error('Error fetching joke:', error.message);
+      }
+    };
+  
+    fetchData();
+  }, [id, getJokeWithScores]);
   const handleOnChange = (e) => {
     const { name, value } = e.target;
     setNewScore((prevNewScore) => {
@@ -31,14 +46,14 @@ const JokePage = () => {
       // Call your scoreApi service to add a score
       await scoreService.addOneScore(score);
       // Update jokeWithScores with the new data
-      const updatedJoke = getJokeWithScores(id);
-      setJokeWithScores(updatedJoke);
+     
     } catch (error) {
       console.error('Error adding score:', error.message);
       throw error;
     }
   };
-  const handleAddScore = async () => {
+  const handleAddScore = (e) => {
+    e.preventDefault();
     try {
       // Validate inputs
       if (!newScore.username || isNaN(newScore.score) || newScore.score < 0 || newScore.score > 10) {
@@ -54,36 +69,34 @@ const JokePage = () => {
         joke: id,
       };
   
-      // Add score through context function
-      await addScore(scoreToAdd);
+      addScore(scoreToAdd);
+
   
-      // Reset form
-      setNewScore({
-        username: "",
-        date: "",
-        score: 0,
-        joke: "",
-      });
-  
+      // Update jokeWithScores with the new data
+      setJokeWithScores((prevJokeWithScores) => {
+        if (!prevJokeWithScores) {
+          return null;
+        }
+        return {
+          ...prevJokeWithScores,
+          scores: [...prevJokeWithScores.scores, scoreToAdd],
+        };
+      }); 
+
+        //reset form
+        e.target.reset();
+        setNewScore({
+          username: "",
+          date: "",
+          score: 0,
+          joke: "",
+        });
+      // navigate("/jokes")
     } catch (error) {
       console.error('Error adding score:', error.message);
     }
   };
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Check if id is available before fetching the joke data
-        if (id) {
-          const jokeData = await getJokeWithScores(id);
-          setJokeWithScores(jokeData);
-        }
-      } catch (error) {
-        console.error('Error fetching joke:', error.message);
-      }
-    };
   
-    fetchData();
-  }, [id, getJokeWithScores]);
   
   return (
     <div>
@@ -95,15 +108,18 @@ const JokePage = () => {
           <p>{`Category: ${jokeWithScores.category}`}</p>
           <p>{`Average Score: ${jokeWithScores.averageScore}`}</p>
           <p>{`Score Count: ${jokeWithScores.scoreCount}`}</p>
+          <p>{`joke id: ${jokeWithScores.id}`}</p>
           <ul>
             {jokeWithScores.scores.map(score => (
               <li key={score.id}>{`${score.username} - ${score.score}`}</li>
             ))}
           </ul>
           <div>
+          <form onSubmit={handleAddScore}>
             <input name='username' type="text" placeholder="Username" value={newScore.username} onChange={handleOnChange}/>
             <input name="score" placeholder="Score" value={newScore.score} onChange={handleOnChange} />
-            <button onClick={handleAddScore}>Add Score</button>
+            <input type="submit" value = "add score"/>
+          </form>
           </div>
         </>
       ): (

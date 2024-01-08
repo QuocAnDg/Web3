@@ -42,10 +42,6 @@ const JokeContextProvider = ({ children }) => {
 
   const getJokeWithScores = (id) => {
     const selectedJoke = jokes.find(joke => joke.id === id);
-    if (!selectedJoke) {
-      console.error('Blague non trouvée.');
-      return null;
-    }
 
     const jokeScores = scores.filter(score => score.joke === selectedJoke.id);
     const scoreCount = jokeScores.length;
