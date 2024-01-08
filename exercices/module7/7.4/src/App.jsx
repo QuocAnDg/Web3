@@ -187,6 +187,7 @@ const App = () => {
     ? anecdotes.find(anecdote => anecdote.id === Number(match.params.id))
     : null
 
+   //<Route path='/create-user' element={user ? <UserCreationPage /> : <Navigate replace to="/" />} />
   return (
     <div>
       <h1>Software anecdotes</h1>
@@ -196,6 +197,7 @@ const App = () => {
       <Route path="/anecdotes" element={<AnecdoteList anecdotes={anecdotes} notification={notification}/>}/>
       <Route path="/create" element={<CreateNew addNew={addNew} />}/>
       <Route path="/about" element={<About />}/>
+    
       </Routes>
       <Footer />
     </div>
